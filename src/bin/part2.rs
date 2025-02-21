@@ -171,20 +171,20 @@ mod tests {
         assert_eq!(tracker.current_pos(), (Pos::new(0, 0), Pos::new(0, 0)));
     }
 
-    // #[test]
-    // fn test_up_down_moves() {
-    //     let mut visited_houses = VisitedHouses::new();
-    //     let moves = Moves::from_str("^v^v^v^v^v").unwrap();
-    //     visited_houses.perform_moves(moves);
-    //     assert_eq!(visited_houses.num_visited_houses(), 11);
-    //     // assert_eq!(visited_houses.current_pos, Pos(0, 0));
-    // }
+    #[test]
+    fn test_up_down_moves() {
+        let mut tracker = RoboSantaTracker::new();
+        let moves = Moves::from_str("^v^v^v^v^v").unwrap();
+        tracker.perform_moves(moves);
+        assert_eq!(tracker.num_visited_houses(), 11);
+        assert_eq!(tracker.current_pos(), (Pos::new(0, 5), Pos::new(0, -5)));
+    }
 
-    // #[test]
-    // fn test_aoc_input() {
-    //     let mut visited_houses = VisitedHouses::new();
-    //     let moves = Moves::from_str(include_str!("../input.txt")).unwrap();
-    //     visited_houses.perform_moves(moves);
-    //     assert_eq!(visited_houses.num_visited_houses(), 2639);
-    // }
+    #[test]
+    fn test_aoc_input() {
+        let mut tracker = RoboSantaTracker::new();
+        let moves = Moves::from_str(include_str!("../../input.txt").trim()).unwrap();
+        tracker.perform_moves(moves);
+        assert_eq!(tracker.num_visited_houses(), 2639);
+    }
 }
