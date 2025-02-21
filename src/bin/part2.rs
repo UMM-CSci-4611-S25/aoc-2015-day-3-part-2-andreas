@@ -7,12 +7,12 @@ fn main() {
 
     let moves = Moves::from_str(file_contents.trim())
         .expect("Failed to parse the input file to a list of moves");
-    let mut santa_tracker = SantaTracker::new();
-    santa_tracker.perform_moves(moves);
+    let mut tracker = RoboSantaTracker::new();
+    tracker.perform_moves(moves);
 
     println!(
-        "Santa delivered presents to {} houses.",
-        santa_tracker.num_visited_houses()
+        "Santa and Robo-Santa delivered presents to {} houses.",
+        tracker.num_visited_houses()
     );
 }
 
@@ -83,12 +83,13 @@ impl FromStr for Moves {
     }
 }
 
-pub struct SantaTracker {
+pub struct RoboSantaTracker {
     visited_houses: HashSet<Pos>,
-    current_position: Pos,
+    santa_position: Pos,
+    robo_santa_position: Pos,
 }
 
-impl SantaTracker {
+impl RoboSantaTracker {
     #[must_use]
     pub fn new() -> Self {
         let initial_position = Pos::new(0, 0);
@@ -97,7 +98,8 @@ impl SantaTracker {
 
         Self {
             visited_houses,
-            current_position: initial_position,
+            santa_position: initial_position,
+            robo_santa_position: initial_position,
         }
     }
 
@@ -107,26 +109,24 @@ impl SantaTracker {
     }
 
     #[must_use]
-    pub const fn current_pos(&self) -> Pos {
-        self.current_position
-    }
-
-    pub fn perform_move(&mut self, direction: Direction) {
-        let new_position = self.current_position + direction;
-        self.current_position = new_position;
-        self.visited_houses.insert(new_position);
+    pub fn current_pos(&self) -> (Pos, Pos) {
+        (self.santa_position, self.robo_santa_position)
     }
 
     pub fn perform_moves(&mut self, moves: Moves) {
-        for m in moves.moves {
-            self.perform_move(m);
+        for (i, m) in moves.moves.iter().enumerate() {
+            if i % 2 == 0 {
+                self.santa_position = self.santa_position + *m;
+                self.visited_houses.insert(self.santa_position);
+            } else {
+                self.robo_santa_position = self.robo_santa_position + *m;
+                self.visited_houses.insert(self.robo_santa_position);
+            }
         }
     }
 }
 
-
-
-impl Default for SantaTracker {
+impl Default for RoboSantaTracker {
     fn default() -> Self {
         Self::new()
     }
@@ -138,10 +138,10 @@ mod tests {
 
     #[test]
     fn test_visited_houses_new() {
-        let visited_houses = SantaTracker::new();
-        assert_eq!(visited_houses.num_visited_houses(), 1);
+        let tracker = RoboSantaTracker::new();
+        assert_eq!(tracker.num_visited_houses(), 1);
         // What do you want to do about the current position?
-        assert_eq!(visited_houses.current_pos(), Pos::new(0, 0));
+        assert_eq!(tracker.current_pos(), (Pos::new(0, 0), Pos::new(0, 0)));
     }
 
     #[test]
@@ -155,21 +155,21 @@ mod tests {
 
     #[test]
     fn test_move_north_south() {
-        let mut visited_houses = SantaTracker::new();
-        visited_houses.perform_move(Direction::North);
-        visited_houses.perform_move(Direction::South);
-        assert_eq!(visited_houses.num_visited_houses(), 3);
-        assert_eq!(visited_houses.current_pos(), Pos::new(1, 0));
+        let mut tracker = RoboSantaTracker::new();
+        let moves = Moves::from_str("^v").unwrap();
+        tracker.perform_moves(moves);
+        assert_eq!(tracker.num_visited_houses(), 3);
+        assert_eq!(tracker.current_pos(), (Pos::new(0, 1), Pos::new(0, -1)));
     }
 
-    // #[test]
-    // fn test_square_moves() {
-    //     let mut visited_houses = VisitedHouses::new();
-    //     let moves = Moves::from_str("^>v<").unwrap();
-    //     visited_houses.perform_moves(moves);
-    //     assert_eq!(visited_houses.num_visited_houses(), 3);
-    //     // assert_eq!(visited_houses.current_pos, Pos(0, 0));
-    // }
+    #[test]
+    fn test_square_moves() {
+        let mut tracker = RoboSantaTracker::new();
+        let moves = Moves::from_str("^>v<").unwrap();
+        tracker.perform_moves(moves);
+        assert_eq!(tracker.num_visited_houses(), 3);
+        assert_eq!(tracker.current_pos(), (Pos::new(0, 0), Pos::new(0, 0)));
+    }
 
     // #[test]
     // fn test_up_down_moves() {
